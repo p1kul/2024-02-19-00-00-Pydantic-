@@ -15,14 +15,17 @@ async def all_inf():
 
 @app.post("/user/{username}/{age}")
 async def post_user(user: User):
-    user.id = len(users)
+    if not users:
+        user.id = 1
+    else:
+        user.id = users[-1].id + 1
     users.append(user)
     return user
 
 @app.put("/user/{user_id}/{username}/{age}")
 async def refresh_user(user_id: int, username: str, age: int, user: str = Body()):
     try:
-        refresh = users[user_id]
+        refresh = users[user_id - 1]
         refresh.username = username
         refresh.age = age
         return refresh
@@ -31,7 +34,8 @@ async def refresh_user(user_id: int, username: str, age: int, user: str = Body()
 
 @app.delete("/user/{user_id}")
 async def delete_user(user_id: int):
-     if user_id >= len(users) or user_id < 0:
+     rul = users[user_id - 1]
+     if  user_id < 0 or rul.id != user_id:
          raise HTTPException(status_code=404, detail="User was not found")
      del_user = users.pop(user_id - 1)
      return del_user
